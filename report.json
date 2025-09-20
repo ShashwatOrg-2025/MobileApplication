@@ -1,0 +1,652 @@
+[
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.1,
+            "longitude": 72.9
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:00:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.06,
+            "longitude": 80.26
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:05:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.12,
+            "longitude": 72.92
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:10:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.08,
+            "longitude": 80.28
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:15:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.14,
+            "longitude": 72.94000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:20:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.100000000000001,
+            "longitude": 80.3
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:25:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.16,
+            "longitude": 72.96000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:30:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.120000000000001,
+            "longitude": 80.32
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:35:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.18,
+            "longitude": 72.98
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:40:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.14,
+            "longitude": 80.34
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:45:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.200000000000003,
+            "longitude": 73.0
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T10:50:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.16,
+            "longitude": 80.36
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T10:55:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.220000000000002,
+            "longitude": 73.02000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:00:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.180000000000001,
+            "longitude": 80.38
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:05:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.240000000000002,
+            "longitude": 73.04
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:10:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.200000000000001,
+            "longitude": 80.4
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:15:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.26,
+            "longitude": 73.06
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:20:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.22,
+            "longitude": 80.42
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:25:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.28,
+            "longitude": 73.08000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:30:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.24,
+            "longitude": 80.44
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:35:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.3,
+            "longitude": 73.10000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:40:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.260000000000002,
+            "longitude": 80.46
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:45:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.32,
+            "longitude": 73.12
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T11:50:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.280000000000001,
+            "longitude": 80.48
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T11:55:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.34,
+            "longitude": 73.14
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:00:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.3,
+            "longitude": 80.5
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:05:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.360000000000003,
+            "longitude": 73.16000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:10:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.32,
+            "longitude": 80.52
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:15:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.380000000000003,
+            "longitude": 73.18
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:20:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.34,
+            "longitude": 80.54
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:25:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.400000000000002,
+            "longitude": 73.2
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:30:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.360000000000001,
+            "longitude": 80.56
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:35:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.42,
+            "longitude": 73.22
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:40:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.38,
+            "longitude": 80.58
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:45:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.44,
+            "longitude": 73.24000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T12:50:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.4,
+            "longitude": 80.6
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T12:55:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.46,
+            "longitude": 73.26
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:00:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.42,
+            "longitude": 80.62
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:05:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.48,
+            "longitude": 73.28
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:10:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.440000000000001,
+            "longitude": 80.64
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:15:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.5,
+            "longitude": 73.30000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:20:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.46,
+            "longitude": 80.66
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:25:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.520000000000003,
+            "longitude": 73.32000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:30:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.48,
+            "longitude": 80.68
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:35:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.540000000000003,
+            "longitude": 73.34
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:40:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.5,
+            "longitude": 80.7
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:45:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.560000000000002,
+            "longitude": 73.36
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T13:50:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.520000000000001,
+            "longitude": 80.72
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T13:55:00Z"
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.580000000000002,
+            "longitude": 73.38000000000001
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90,
+        "timestamp": "2025-09-20T14:00:00Z"
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.540000000000001,
+            "longitude": 80.74
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8,
+        "timestamp": "2025-09-20T14:05:00Z"
+    }
+]

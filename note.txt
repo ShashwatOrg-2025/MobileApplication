@@ -1,0 +1,689 @@
+YOUR_API_KEY=AIzaSyC_y0F2_l4e93h6ehGre4Tfp7M5ZYeeOMw
+1. Overview
+
+This system is an interactive disaster alert map built using Leaflet.js. 
+It visualizes alerts (Cyclones, Floods, Tsunamis, Oil Spills, etc.) on a map with dots representing reports. To improve clarity at different zoom levels, the system implements a grid-based clustering mechanism:
+At normal/zoomed-out view → one combined dot per grid (aggregated alerts).
+At zoomed-in view → each grid cell is visible, and individual report dots are shown.
+This ensures the map is clean and readable at large scale while still providing detailed granularity when zoomed in.
+
+
+2. Features
+
+Dynamic Grid-Based Aggregation
+The world map is divided into square grids.
+Each grid contains disaster reports falling inside its boundaries.
+A single aggregated dot is shown for the grid when zoomed out.
+Zoom-Based Splitting
+When zooming in, the grid lines become visible.
+Individual reports inside the grid are displayed as smaller dots.
+
+
+> Severity-Based Coloring
+
+  Green (1–3): Low severity
+  Orange (4–7): Medium severity
+  Red (8–10): High severity
+
+
+> Interactive Popups
+  Clicking a dot displays details of the alert (Name, Location, Type, Description, Other Info).
+
+
+3. Data Structure (JSON Format)
+Each alert follows this structure:
+
+{
+  "NAME": "Cyclone Warning",
+  "LOCATION": [18.5204, 73.8567], 
+  "TYPE": "Cyclone",
+  "UPLOADMEDIA": "icon.png",
+  "DESCRIPTION": "Cyclone expected in coastal areas",
+  "OTHERINFO": "Wind speed up to 120 km/h",
+  "SEVERITY": 8
+}
+
+
+4. Visualization Logic
+  Grid Calculation
+  Reports are grouped into grid cells based on latitude & longitude.
+  A grid cell is uniquely identified by (lat, lng) intervals.
+  Normal Zoom (Combined View)
+  A single dot represents all alerts inside the grid.
+  The dot’s color and popup summarize the combined reports.
+  Zoomed-In View (Detailed Grid)
+
+
+The grid lines appear as squares.
+Each individual report is shown as a smaller dot inside its cell.
+
+
+Marker Scaling
+Dot size remains small and proportional even at low zoom levels.
+Ensures dots do not cover entire cities when zoomed out.
+
+
+5. Example Test Case (Pune Reports)
+  If two reports exist inside Pune grid:
+  Cyclone Warning – Severity 8
+  Flood Alert – Severity 5
+
+
+At Zoomed Out View:
+A single dot appears over Pune.
+Popup shows → “2 reports combined: Cyclone Warning, Flood Alert”.
+
+At Zoomed In View:
+Pune’s grid is visible.
+Two smaller dots appear inside the grid square.
+Each dot shows its own popup.
+
+6. Advantages
+✅ Prevents clutter when many alerts exist.
+✅ Provides both macro (combined) and micro (individual) views.
+✅ Easy to scale to national or global data.
+✅ Clear severity indication with colors.
+
+
+7. Tools & Technologies
+Leaflet.js – Map rendering
+JavaScript/HTML/CSS – Frontend logic & UI
+GeoJSON / Custom JSON – Alert data storage
+OpenStreetMap – Base map tiles
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Coastal Disaster Map</title>
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      #form-container {
+        margin: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        max-width: 400px;
+        background: #f9f9f9;
+      }
+      #map {
+        width: 100%;
+        height: 600px;
+        margin-top: 15px;
+      }
+      label {
+        display: block;
+        margin-top: 8px;
+      }
+      input, textarea, select, button {
+        width: 100%;
+        padding: 6px;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Indian Coastal Disaster Hotspots</h3>
+
+    <!-- 📌 Report Form -->
+    <div id="form-container">
+      <h4>Submit a Disaster Report</h4>
+      <form id="reportForm">
+        <label>Latitude: <input type="number" step="0.0001" id="lat" required /></label>
+        <label>Longitude: <input type="number" step="0.0001" id="lng" required /></label>
+        <label>Severity (1-10): 
+          <input type="number" min="1" max="10" id="severity" required />
+        </label>
+        <label>Description: 
+          <textarea id="description"></textarea>
+        </label>
+        <label>Other Info: <input type="text" id="otherinfo" /></label>
+        <button type="submit">Add Report</button>
+      </form>
+    </div>
+
+    <div id="map"></div>
+
+    <script type="module" src="./index.js"></script>
+
+    <!-- ✅ Google Maps API -->
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_y0F2_l4e93h6ehGre4Tfp7M5ZYeeOMw"      async
+      defer
+    ></script>
+  </body>
+</html>
+
+
+
+
+<!-- src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_y0F2_l4e93h6ehGre4Tfp7M5ZYeeOMw" -->let allReports = []; 
+let map;
+let markers = [];
+let gridRects = [];
+let activeInfoWindow = null;
+let pinnedMarker = null;
+
+const GRID_SIZE = 0.05; // ~5.5 km
+
+// Group reports by grid
+function assignReportsToGrid(reports) {
+  const gridGroups = {};
+  reports.forEach((report) => {
+    const lat = report.LOCATION.latitude;
+    const lng = report.LOCATION.longitude;
+
+    const keyLat = Math.floor(lat / GRID_SIZE);
+    const keyLng = Math.floor(lng / GRID_SIZE);
+    const gridKey = `${keyLat},${keyLng}`;
+
+    if (!gridGroups[gridKey]) gridGroups[gridKey] = [];
+    gridGroups[gridKey].push(report);
+  });
+  return gridGroups;
+}
+
+// Compute CRS score
+function computeCRS(group) {
+  const W_reports = 1.0, W_verified = 5.0, W_severity = 2.5, W_recency = 3.0;
+  const now = Date.now(), decayT = 3600 * 1000;
+
+  let N_reports = 0, N_verified = 0, S_sum = 0, R_sum = 0;
+
+  group.forEach((r) => {
+    const reportTime = r.timestamp || now;
+    const t = now - reportTime;
+    const R = Math.exp(-t / decayT);
+
+    N_reports++;
+    if (r.verified) N_verified++;
+    S_sum += r.severityIndex || 1;
+    R_sum += R;
+  });
+
+  const S_avg = S_sum / group.length;
+  const R_recency = R_sum / group.length;
+
+  return (
+    N_reports * W_reports +
+    N_verified * W_verified +
+    S_avg * W_severity +
+    R_recency * W_recency
+  );
+}
+function scaleCRS(value, min = 0, max = 50) {
+  // adjust max depending on how big CRS gets in your data
+  const scaled = ((value - min) / (max - min)) * 10;
+  return Math.max(0, Math.min(10, scaled));
+}
+
+
+// Marker icon
+function getHotspotIcon(CRS, zoom, isCluster = false) {
+  let radius = isCluster ? 5 + CRS * 0.8 : 4 + CRS * 0.6;
+  radius = Math.min(radius, 14);
+
+  // 3-color coding
+  let color = "yellow";      // low CRS
+  if (CRS > 7) color = "red";       // high CRS
+  else if (CRS >= 4 && CRS <= 7) color = "orange"; // medium CRS
+
+  return {
+    url:
+      "data:image/svg+xml;charset=UTF-8," +
+      encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="${radius*2}" height="${radius*2}">
+          <circle cx="${radius}" cy="${radius}" r="${radius}" fill="${color}" fill-opacity="0.9"/>
+        </svg>
+      `),
+    scaledSize: new google.maps.Size(radius*2, radius*2),
+    anchor: new google.maps.Point(radius, radius),
+  };
+}
+
+
+
+// Clear grid rects
+function clearGridRects() {
+  gridRects.forEach((rect) => rect.setMap(null));
+  gridRects = [];
+}
+
+function drawGridBounds(grouped) {
+  Object.keys(grouped).forEach((gridKey) => {
+    const [keyLat, keyLng] = gridKey.split(",").map(Number);
+
+    const bounds = {
+      north: (keyLat + 1) * GRID_SIZE,
+      south: keyLat * GRID_SIZE,
+      east: (keyLng + 1) * GRID_SIZE,
+      west: keyLng * GRID_SIZE,
+    };
+
+    const rect = new google.maps.Rectangle({
+      strokeColor: "#0000FF",
+      strokeOpacity: 0.4,
+      strokeWeight: 1,
+      fillColor: "#0000FF",
+      fillOpacity: 0.05,
+      map,
+      bounds,
+    });
+
+    gridRects.push(rect);
+  });
+}
+
+// Render markers
+function renderMarkers() {
+  markers.forEach((m) => m.setMap(null));
+  markers = [];
+  clearGridRects();
+
+  const zoom = map.getZoom();
+  const grouped = assignReportsToGrid(allReports);
+
+  if (zoom < 10) {
+    // Show one marker per grid (combined)
+    Object.values(grouped).forEach((group) => {
+      const CRSraw = computeCRS(group);
+      const CRS = scaleCRS(CRSraw);
+
+
+      // marker at centroid of grid
+      const avgLat = group.reduce((s, r) => s + r.LOCATION.latitude, 0) / group.length;
+      const avgLng = group.reduce((s, r) => s + r.LOCATION.longitude, 0) / group.length;
+
+      const marker = new google.maps.Marker({
+        position: { lat: avgLat, lng: avgLng },
+        map,
+        title: `CRS: ${CRS.toFixed(1)}, Reports: ${group.length}`,
+        icon: getHotspotIcon(CRS, zoom, true),
+      });
+
+      markers.push(marker);
+    });
+  } else {
+    // Show individual markers + grid bounds
+    Object.entries(grouped).forEach(([gridKey, group]) => {
+      group.forEach((report) => {
+        const CRSraw = computeCRS([report]);
+        const CRS = scaleCRS(CRSraw);
+        const marker = new google.maps.Marker({
+          position: {
+            lat: report.LOCATION.latitude,
+            lng: report.LOCATION.longitude,
+          },
+          map,
+          title: `${report.NAME} | CRS: ${CRS.toFixed(1)}`,
+          icon: getHotspotIcon(CRS, zoom, false),
+        });
+        markers.push(marker);
+      });
+    });
+
+    drawGridBounds(grouped);
+  }
+}
+
+// Init map + load JSON
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 5,
+    center: { lat: 20.5937, lng: 78.9629 },
+  });
+
+  // Fetch disaster reports from JSON
+  fetch("report.json")
+    .then((res) => res.json())
+    .then((data) => {
+      allReports = data.map((r) => ({
+        ...r,
+        timestamp: Date.now(),
+        verified: false,
+      }));
+      renderMarkers();
+    })
+    .catch((err) => console.error("Error loading reports:", err));
+
+  map.addListener("zoom_changed", () => {
+    renderMarkers();
+  });
+}
+
+window.addEventListener("load", initMap);[
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.1,
+            "longitude": 72.9
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai coast.",
+        "OTHERINFO": "Wind speeds expected up to 120 km/h.",
+        "severityIndex": 90
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.05,
+            "longitude": 80.25
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rainfall causing Chennai flooding.",
+        "OTHERINFO": "Evacuation advised in low-lying areas.",
+        "severityIndex": 8
+    },
+    {
+        "NAME": "Oil Spill",
+        "LOCATION": {
+            "latitude": 9.95,
+            "longitude": 76.28
+        },
+        "TYPE": "Oil Spill",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Small oil spill detected near Kochi port.",
+        "OTHERINFO": "Containment booms deployed.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Tsunami Risk",
+        "LOCATION": {
+            "latitude": 17.7,
+            "longitude": 83.32
+        },
+        "TYPE": "Tsunami",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Seismic activity detected offshore Visakhapatnam.",
+        "OTHERINFO": "Early warning systems activated.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 22.55,
+            "longitude": 88.35
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone forming near Kolkata coast.",
+        "OTHERINFO": "Heavy rainfall expected.",
+        "severityIndex": 6
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 19.85,
+            "longitude": 85.9
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Odisha coast flooding after heavy rains.",
+        "OTHERINFO": "Local authorities deployed rescue teams.",
+        "severityIndex": 3
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 21.6,
+            "longitude": 69.65
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Gujarat coast under cyclone watch.",
+        "OTHERINFO": "Fishing boats advised to stay in harbor.",
+        "severityIndex": 6
+    },
+    {
+        "NAME": "Tsunami Risk",
+        "LOCATION": {
+            "latitude": 19.2,
+            "longitude": 72.8
+        },
+        "TYPE": "Tsunami",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Tsunami detected near Mumbai coast.",
+        "OTHERINFO": "Evacuation shelters activated.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Oil Spill",
+        "LOCATION": {
+            "latitude": 13.1,
+            "longitude": 80.28
+        },
+        "TYPE": "Oil Spill",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Oil leakage reported offshore Chennai.",
+        "OTHERINFO": "Containment in progress.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 9.92,
+            "longitude": 76.3
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Heavy rains causing minor flooding in Kochi.",
+        "OTHERINFO": "Local roads submerged.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.12,
+            "longitude": 72.88
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai suburbs.",
+        "OTHERINFO": "Strong winds and rain.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.09,
+            "longitude": 80.3
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Overflowing canals in Chennai.",
+        "OTHERINFO": "Residents advised to move to higher ground.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Tsunami Risk",
+        "LOCATION": {
+            "latitude": 17.72,
+            "longitude": 83.35
+        },
+        "TYPE": "Tsunami",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Tsunami warning near Visakhapatnam.",
+        "OTHERINFO": "Ships ordered to return to port.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Oil Spill",
+        "LOCATION": {
+            "latitude": 9.94,
+            "longitude": 76.27
+        },
+        "TYPE": "Oil Spill",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Leakage from tanker near Kochi.",
+        "OTHERINFO": "Containment underway.",
+        "severityIndex": 6
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 22.56,
+            "longitude": 88.34
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone forming near Kolkata.",
+        "OTHERINFO": "Heavy rainfall expected.",
+        "severityIndex": 7
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 19.87,
+            "longitude": 85.88
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Odisha coast heavy flooding.",
+        "OTHERINFO": "Evacuations ongoing.",
+        "severityIndex": 10
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 21.62,
+            "longitude": 69.63
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone Gujarat coast.",
+        "OTHERINFO": "Alert for ports and fishing.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Tsunami Risk",
+        "LOCATION": {
+            "latitude": 19.25,
+            "longitude": 72.82
+        },
+        "TYPE": "Tsunami",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Tsunami detected near Mumbai coast.",
+        "OTHERINFO": "Evacuations started.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Oil Spill",
+        "LOCATION": {
+            "latitude": 13.12,
+            "longitude": 80.26
+        },
+        "TYPE": "Oil Spill",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Oil leakage offshore Chennai.",
+        "OTHERINFO": "Cleanup teams deployed.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 9.91,
+            "longitude": 76.29
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Minor flooding in Kochi suburbs.",
+        "OTHERINFO": "Local roads flooded.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 19.15,
+            "longitude": 72.85
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone approaching Mumbai.",
+        "OTHERINFO": "Strong wind advisory.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 13.06,
+            "longitude": 80.31
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Chennai heavy rainfall and flooding.",
+        "OTHERINFO": "Evacuations in low-lying areas.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Tsunami Risk",
+        "LOCATION": {
+            "latitude": 17.75,
+            "longitude": 83.33
+        },
+        "TYPE": "Tsunami",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Seismic activity near Visakhapatnam.",
+        "OTHERINFO": "Ships returning to port.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Oil Spill",
+        "LOCATION": {
+            "latitude": 9.93,
+            "longitude": 76.31
+        },
+        "TYPE": "Oil Spill",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Leak detected offshore Kochi.",
+        "OTHERINFO": "Containment deployed.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 22.58,
+            "longitude": 88.36
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Cyclone near Kolkata coast.",
+        "OTHERINFO": "Heavy rainfall expected.",
+        "severityIndex": 1
+    },
+    {
+        "NAME": "Flood Warning",
+        "LOCATION": {
+            "latitude": 19.89,
+            "longitude": 85.92
+        },
+        "TYPE": "Flood",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Odisha coast heavy rainfall.",
+        "OTHERINFO": "Evacuation ongoing.",
+        "severityIndex": 2
+    },
+    {
+        "NAME": "Cyclone Alert",
+        "LOCATION": {
+            "latitude": 21.63,
+            "longitude": 69.67
+        },
+        "TYPE": "Cyclone",
+        "UPLOADMEDIA": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Beach_disaster_icon.png",
+        "Description": "Odisha coast heavy rainfall.",
+        "OTHERINFO": "Evacuation ongoing.",
+        "severityIndex": 2
+    }
+]#map {
+  height: 100vh;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+h3 {
+  margin: 10px;
+  padding: 10px;
+}

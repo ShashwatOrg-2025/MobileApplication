@@ -12,14 +12,37 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow AlertReporterApp to use your location."
+        }
+      ]
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sih2025.alertreporterapp",
+      "config": {
+        "googleMapsApiKey": "AIzaSyC_y0F2_l4e93h6ehGre4Tfp7M5ZYeeOMw"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "com.sih2025.alertreporterapp",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC_y0F2_l4e93h6ehGre4Tfp7M5ZYeeOMw"
+        }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
