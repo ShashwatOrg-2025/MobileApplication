@@ -1,6 +1,6 @@
 // AppNavigator.js - Main navigation structure for the app
-import React from 'react';
-import { Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -14,6 +14,9 @@ import MyReportsScreen from '../screens/MyReportsScreen';
 import AlertsScreen from '../screens/AlertsScreen';
 import ManageProfileScreen from '../screens/ManageProfileScreen';
 import ReportAlertScreen from '../screens/ReportAlertScreen';
+
+// Import auth service
+import { isAuthenticated } from '../services/authService';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,12 +95,51 @@ const MainTabNavigator = () => {
   );
 };
 
+// Loading screen component
+const LoadingScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+    <ActivityIndicator size="large" color="#007AFF" />
+    <Text style={{ marginTop: 10, fontSize: 16, color: '#666' }}>Loading...</Text>
+  </View>
+);
+
 // Main App Navigator
 const AppNavigator = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status on app start
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const authenticated = await isAuthenticated();
+        setIsLoggedIn(authenticated);
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        setIsLoggedIn(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Loading" component={LoadingScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName={isLoggedIn ? "MainTabs" : "Login"}
         screenOptions={{
           headerShown: false,
         }}

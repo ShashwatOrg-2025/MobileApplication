@@ -11,16 +11,27 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { login, testApiConnection } from '../services/authService';
 
 const LoginScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Validate email format
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   // Basic validation for login form
   const validateForm = () => {
-    if (!username.trim()) {
-      Alert.alert('Error', 'Please enter your username');
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email address');
+      return false;
+    }
+    if (!isValidEmail(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
       return false;
     }
     if (!password.trim()) {
@@ -30,20 +41,65 @@ const LoginScreen = ({ navigation }) => {
     return true;
   };
 
+  // Handle API test button press
+  const handleTestApi = async () => {
+    console.log('🧪 Test API button pressed');
+    try {
+      const result = await testApiConnection();
+      console.log('🧪 API test result:', result);
+      Alert.alert(
+        'API Test Result', 
+        result.success 
+          ? `API is reachable! Status: ${result.status}` 
+          : `API test failed: ${result.error}`
+      );
+    } catch (error) {
+      console.error('🧪 API test error:', error);
+      Alert.alert('API Test Error', error.message);
+    }
+  };
+
   // Handle login button press
-  const handleLogin = () => {
-    if (!validateForm()) return;
+  const handleLogin = async () => {
+    console.log('🚀 Login button pressed');
+    console.log('📝 Form validation starting...');
     
+    if (!validateForm()) {
+      console.log('❌ Form validation failed');
+      return;
+    }
+    
+    console.log('✅ Form validation passed');
+    console.log('🔄 Setting loading state to true');
     setLoading(true);
-    // TODO: Implement API call for login
-    console.log('Login attempt:', { username, password });
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      console.log('📞 Calling login API with credentials...');
+      console.log('📧 Email:', email);
+      console.log('🔒 Password length:', password.length);
+      
+      // Call the login API
+      const result = await login({ email, password });
+      
+      console.log('📨 Login API result received:', result);
+      
+      if (result.success) {
+        console.log('🎉 Login successful! Navigating to MainTabs...');
+        // Navigate to MainTabs on successful login
+        navigation.navigate('MainTabs');
+      } else {
+        console.log('❌ Login failed:', result.error);
+        console.log('📊 Full error details:', result);
+        Alert.alert('Login Failed', result.error || 'Unable to login. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('💥 Unexpected login error:', error);
+      console.error('Error stack:', error.stack);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      console.log('🔄 Setting loading state to false');
       setLoading(false);
-      // Navigate to MainTabs on successful login
-      navigation.navigate('MainTabs');
-    }, 1000);
+    }
   };
 
   return (
@@ -56,14 +112,15 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.title}>Alert Reporter</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
 
-          {/* Username Input */}
+          {/* Email Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Username</Text>
+            <Text style={styles.label}>Email Address</Text>
             <TextInput
               style={styles.input}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Enter your username"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your email address"
+              keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -90,6 +147,16 @@ const LoginScreen = ({ navigation }) => {
           >
             <Text style={styles.buttonText}>
               {loading ? 'Signing In...' : 'Sign In'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Test API Button - For debugging */}
+          <TouchableOpacity 
+            style={[styles.testButton]}
+            onPress={handleTestApi}
+          >
+            <Text style={styles.testButtonText}>
+              🧪 Test API Connection
             </Text>
           </TouchableOpacity>
 
@@ -172,6 +239,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: '600',
+  },
+  testButton: {
+    backgroundColor: '#FF9500',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  testButtonText: {
+    color: 'white',
+    fontSize: 14,
     fontWeight: '600',
   },
   linkContainer: {

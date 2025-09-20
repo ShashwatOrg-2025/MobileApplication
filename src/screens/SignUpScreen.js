@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { signUp } from '../services/authService';
 
 const SignUpScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -84,22 +85,27 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   // Handle signup button press
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!validateForm()) return;
     
     setLoading(true);
-    // TODO: Implement API call for signup
-    console.log('Signup attempt:', formData);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the signup API
+      const result = await signUp(formData);
+      
+      if (result.success) {
+        // Navigate directly to Login screen after successful signup
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('Error', result.error);
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
       setLoading(false);
-      Alert.alert(
-        'Success', 
-        'Account created successfully! Please sign in.',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-      );
-    }, 1000);
+    }
   };
 
   return (

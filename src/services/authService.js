@@ -2,8 +2,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Base API URL - Replace with your actual API endpoint
-const API_BASE_URL = 'https://your-api-endpoint.com/api';
+// Base API URL for the backend
+const API_BASE_URL = 'https://backend-095c.onrender.com/api';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
@@ -14,32 +14,68 @@ const apiClient = axios.create({
   },
 });
 
-// Add request interceptor to include auth token
+// Add request interceptor to include auth token and log requests
 apiClient.interceptors.request.use(
   async (config) => {
+    console.log('🚀 Making HTTP request:');
+    console.log('📍 URL:', config.baseURL + config.url);
+    console.log('🔧 Method:', config.method?.toUpperCase());
+    console.log('📋 Headers:', config.headers);
+    console.log('📦 Data:', config.data ? JSON.stringify(config.data, null, 2) : 'No data');
+    
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Added auth token to request');
+      } else {
+        console.log('🔓 No auth token found');
       }
     } catch (error) {
-      console.error('Error getting auth token:', error);
+      console.error('❌ Error getting auth token:', error);
     }
+    
+    console.log('✅ Final request config:', {
+      url: config.baseURL + config.url,
+      method: config.method,
+      headers: config.headers,
+      timeout: config.timeout
+    });
+    
     return config;
   },
   (error) => {
+    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor to handle common errors
+// Add response interceptor to handle common errors and log responses
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('📨 HTTP response received:');
+    console.log('📍 URL:', response.config.url);
+    console.log('✅ Status:', response.status, response.statusText);
+    console.log('📋 Headers:', response.headers);
+    console.log('📦 Data:', response.data);
+    
+    return response;
+  },
   async (error) => {
+    console.error('❌ HTTP response error:');
+    console.error('📍 URL:', error.config?.url);
+    console.error('💥 Error message:', error.message);
+    console.error('📊 Response status:', error.response?.status);
+    console.error('📋 Response headers:', error.response?.headers);
+    console.error('📦 Response data:', error.response?.data);
+    console.error('🔧 Request config:', error.config);
+    
     if (error.response?.status === 401) {
+      console.log('🔒 401 Unauthorized - clearing stored tokens');
       // Token expired or invalid, clear storage and redirect to login
       await AsyncStorage.multiRemove(['authToken', 'userData']);
     }
+    
     return Promise.reject(error);
   }
 );
@@ -55,77 +91,213 @@ apiClient.interceptors.response.use(
  */
 export const signUp = async (userData) => {
   try {
-    const response = await apiClient.post('/signup', userData);
-    return {
+    console.log('📝 Starting signup process...');
+    console.log('👤 Signup data:', { 
+      username: userData.username,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber,
+      password: '***' // Don't log actual password
+    });
+    
+    console.log('🌐 Making API request to:', `${API_BASE_URL}/auth/register`);
+    
+    const response = await apiClient.post('/auth/register', userData);
+    
+    console.log('✅ Signup API response status:', response.status);
+    console.log('📥 Signup API response data:', response.data);
+    
+    const result = {
       success: true,
       data: response.data,
-      message: 'Account created successfully',
+      message: response.data.message || 'Account created successfully',
     };
+    
+    console.log('🎉 Signup successful, returning result:', result);
+    return result;
+    
   } catch (error) {
-    console.error('Signup error:', error);
-    return {
+    console.error('❌ Signup error occurred:');
+    console.error('Error object:', error);
+    console.error('Error message:', error.message);
+    console.error('Error response:', error.response);
+    console.error('Error response data:', error.response?.data);
+    console.error('Error response status:', error.response?.status);
+    
+    const errorResult = {
       success: false,
-      error: error.response?.data?.message || 'Failed to create account',
+      error: error.response?.data?.message || error.message || 'Failed to create account',
+      statusCode: error.response?.status,
+      fullError: error.response?.data || error.message,
     };
+    
+    console.log('💥 Returning signup error result:', errorResult);
+    return errorResult;
   }
 };
 
 /**
  * User login function
  * @param {Object} credentials - User login credentials
- * @param {string} credentials.username - User's username
+ * @param {string} credentials.email - User's email address
  * @param {string} credentials.password - User's password
  * @returns {Promise<Object>} API response with auth token and user data
  */
 export const login = async (credentials) => {
   try {
-    const response = await apiClient.post('/login', credentials);
+    console.log('🔐 Starting login process...');
+    console.log('📧 Login credentials:', { 
+      email: credentials.email, 
+      password: '***' // Don't log actual password
+    });
     
-    if (response.data.token) {
-      // Store auth token and user data
+    // Log the full request details
+    console.log('🌐 Making API request to:', `${API_BASE_URL}/auth/login`);
+    console.log('📤 Request payload:', { 
+      email: credentials.email, 
+      password: '[HIDDEN]' 
+    });
+    
+    const response = await apiClient.post('/auth/login', credentials);
+    
+    console.log('✅ Login API response status:', response.status);
+    console.log('📥 Login API response data:', response.data);
+    
+    if (response.data && response.data.token) {
+      console.log('🔑 Token received, storing in AsyncStorage...');
+      
+      // Store auth token - the API returns user data in the JWT token
       await AsyncStorage.setItem('authToken', response.data.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+      console.log('💾 Token stored successfully');
+      
+      // Decode JWT token to extract user information
+      let decodedUserData = {};
+      try {
+        // JWT tokens have 3 parts separated by dots: header.payload.signature
+        const tokenParts = response.data.token.split('.');
+        if (tokenParts.length === 3) {
+          // Decode the payload (second part)
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('🔓 Decoded JWT payload:', payload);
+          
+          decodedUserData = {
+            userId: payload.userId,
+            email: payload.email,
+            username: payload.username,
+            phoneNumber: payload.phoneNumber,
+            fullName: payload.fullName || payload.username,
+          };
+        }
+      } catch (decodeError) {
+        console.warn('⚠️ Failed to decode JWT token:', decodeError);
+        // Fallback to basic user data
+        decodedUserData = {
+          email: credentials.email,
+        };
+      }
+      
+      // Store comprehensive user info
+      const userData = {
+        ...decodedUserData,
+        email: credentials.email, // Ensure email is always available
+      };
+      
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      console.log('👤 User data stored successfully:', userData);
+    } else {
+      console.warn('⚠️ No token received in response:', response.data);
     }
     
-    return {
+    const result = {
       success: true,
       data: response.data,
-      message: 'Login successful',
+      message: response.data.message || 'Login successful',
     };
+    
+    console.log('🎉 Login successful, returning result:', result);
+    return result;
+    
   } catch (error) {
-    console.error('Login error:', error);
-    return {
+    console.error('❌ Login error occurred:');
+    console.error('Error object:', error);
+    console.error('Error message:', error.message);
+    console.error('Error response:', error.response);
+    console.error('Error response data:', error.response?.data);
+    console.error('Error response status:', error.response?.status);
+    console.error('Error response headers:', error.response?.headers);
+    
+    const errorResult = {
       success: false,
-      error: error.response?.data?.message || 'Failed to login',
+      error: error.response?.data?.message || error.message || 'Failed to login',
+      statusCode: error.response?.status,
+      fullError: error.response?.data || error.message,
     };
+    
+    console.log('💥 Returning error result:', errorResult);
+    return errorResult;
   }
 };
 
 /**
  * User logout function
- * Clears local storage and optionally notifies server
- * @returns {Promise<Object>} Logout result
+ * @description Clears local storage and notifies the server about logout
+ * @returns {Promise<Object>} Logout result with success status and message
  */
 export const logout = async () => {
   try {
-    // Optional: Notify server about logout
-    // await apiClient.post('/logout');
+    console.log('🚪 Starting logout process...');
+    
+    // Call the backend logout endpoint
+    console.log('🔄 Calling server logout endpoint...');
+    const response = await apiClient.post('/auth/logout');
+    console.log('✅ Server logout successful:', response.data);
     
     // Clear local storage
+    console.log('🗑️ Clearing stored authentication data...');
     await AsyncStorage.multiRemove(['authToken', 'userData']);
+    console.log('✅ Authentication data cleared successfully');
     
-    return {
+    // Verify data was cleared
+    const remainingToken = await AsyncStorage.getItem('authToken');
+    const remainingUserData = await AsyncStorage.getItem('userData');
+    
+    if (!remainingToken && !remainingUserData) {
+      console.log('🎉 Logout verification successful - all data cleared');
+    } else {
+      console.warn('⚠️ Logout verification warning - some data may remain:', {
+        token: !!remainingToken,
+        userData: !!remainingUserData
+      });
+    }
+    
+    const result = {
       success: true,
-      message: 'Logged out successfully',
+      message: response.data.message || 'Logged out successfully',
     };
+    
+    console.log('🎉 Logout completed successfully:', result);
+    return result;
+    
   } catch (error) {
-    console.error('Logout error:', error);
-    // Even if server request fails, clear local storage
-    await AsyncStorage.multiRemove(['authToken', 'userData']);
-    return {
-      success: true,
-      message: 'Logged out successfully',
+    console.error('❌ Logout error occurred:', error);
+    console.error('Error details:', error.message, error.stack);
+    
+    // Even if server request fails, try to clear local storage
+    try {
+      console.log('🔄 Attempting emergency cleanup...');
+      await AsyncStorage.multiRemove(['authToken', 'userData']);
+      console.log('✅ Emergency cleanup successful');
+    } catch (cleanupError) {
+      console.error('💥 Emergency cleanup failed:', cleanupError);
+    }
+    
+    const result = {
+      success: true, // Still return success since we want to proceed with logout
+      message: 'Logged out successfully (with cleanup)',
+      warning: 'Some cleanup operations may have failed',
     };
+    
+    console.log('⚠️ Logout completed with warnings:', result);
+    return result;
   }
 };
 
@@ -204,6 +376,40 @@ export const refreshToken = async () => {
     return {
       success: false,
       error: 'Failed to refresh token',
+    };
+  }
+};
+
+/**
+ * Test API connectivity
+ * @returns {Promise<Object>} Test result
+ */
+export const testApiConnection = async () => {
+  try {
+    console.log('🧪 Testing API connection...');
+    console.log('🌐 Testing URL:', `${API_BASE_URL}/auth/login`);
+    
+    // Try a simple request to see if the API is reachable
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'OPTIONS',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('🧪 Test response status:', response.status);
+    console.log('🧪 Test response headers:', response.headers);
+    
+    return {
+      success: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+    };
+  } catch (error) {
+    console.error('🧪 API connection test failed:', error);
+    return {
+      success: false,
+      error: error.message,
     };
   }
 };

@@ -1,5 +1,5 @@
 // ManageProfileScreen.js - User profile management and logout
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,19 +8,77 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { logout, getUserData } from '../services/authService';
 
 const ManageProfileScreen = ({ navigation }) => {
-  // Sample user data (will be replaced with actual user data from AsyncStorage/API)
+  // User profile state
   const [userProfile, setUserProfile] = useState({
-    username: 'john_doe',
-    email: 'john.doe@example.com',
-    phoneNumber: '1234567890',
-    fullName: 'John Doe',
+    username: '',
+    email: '',
+    phoneNumber: '',
+    fullName: '',
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState({ ...userProfile });
+  const [loading, setLoading] = useState(true);
+
+  // Load user data function
+  const loadUserData = async () => {
+    console.log('👤 Loading user data for profile screen...');
+    setLoading(true);
+    
+    try {
+      const userData = await getUserData();
+      console.log('📥 Retrieved user data from storage:', userData);
+      
+      if (userData) {
+        const profile = {
+          username: userData.username || 'N/A',
+          email: userData.email || 'N/A',
+          phoneNumber: userData.phoneNumber || 'N/A',
+          fullName: userData.fullName || userData.username || 'N/A',
+        };
+        
+        console.log('✅ Processed profile data:', profile);
+        setUserProfile(profile);
+        setEditedProfile(profile);
+      } else {
+        console.warn('⚠️ No user data found in storage');
+        // Set default empty profile
+        const emptyProfile = {
+          username: 'Not Available',
+          email: 'Not Available',
+          phoneNumber: 'Not Available',
+          fullName: 'Not Available',
+        };
+        setUserProfile(emptyProfile);
+        setEditedProfile(emptyProfile);
+      }
+    } catch (error) {
+      console.error('❌ Error loading user data:', error);
+      Alert.alert('Error', 'Failed to load profile data. Please try logging in again.');
+    } finally {
+      setLoading(false);
+      console.log('🔄 Profile data loading completed');
+    }
+  };
+
+  // Load user data on component mount
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  // Reload data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('🎯 Profile screen focused, reloading user data...');
+      loadUserData();
+    }, [])
+  );
 
   // Handle profile field updates
   const updateField = (field, value) => {
@@ -46,6 +104,8 @@ const ManageProfileScreen = ({ navigation }) => {
 
   // Handle logout functionality
   const handleLogout = () => {
+    console.log('🚪 Logout button pressed');
+    
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -53,14 +113,43 @@ const ManageProfileScreen = ({ navigation }) => {
         {
           text: 'Cancel',
           style: 'cancel',
+          onPress: () => console.log('❌ Logout cancelled by user'),
         },
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
-            // TODO: Clear AsyncStorage and navigate to Login
-            console.log('User logged out');
-            navigation.navigate('Login');
+          onPress: async () => {
+            console.log('✅ User confirmed logout, proceeding...');
+            
+            try {
+              console.log('🔄 Calling logout service...');
+              
+              // Call logout service to clear stored data and notify server
+              await logout();
+              console.log('🎉 Logout successful, clearing navigation stack...');
+              
+              // Always navigate to Login screen even if server call fails
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+              
+              console.log('🔄 Navigation reset to Login screen');
+            } catch (error) {
+              console.error('💥 Logout error occurred:', error);
+              console.error('Error details:', error.message, error.stack);
+              
+              // Still navigate to login screen even if there's an error
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+              
+              // Show error message after navigation
+              setTimeout(() => {
+                Alert.alert('Warning', 'Logged out with some errors. Please login again.');
+              }, 500);
+            }
           },
         },
       ]
