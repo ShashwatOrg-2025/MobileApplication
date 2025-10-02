@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Alert } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from './src/navigation/AppNavigator';
 import { checkPermissions } from './src/utils/permissionsUtils';
 import LoadingSpinner from './src/components/LoadingSpinner';
@@ -40,9 +41,11 @@ export default function App() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <StatusBar style="auto" />
-      <AppNavigator />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <StatusBar style="auto" />
+        <AppNavigator />
+      </View>
+    </GestureHandlerRootView>
   );
 }

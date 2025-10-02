@@ -14,9 +14,7 @@ import {
   getMarkerColor,
 } from '../utils/mapUtils';
 import MapScreenWeb from './MapScreenWeb';
-
-// Bottom Sheet
-import BottomSheet from '@gorhom/bottom-sheet';
+import CustomBottomSheet from '../components/CustomBottomSheet';
 
 // Only import MapView if not on web
 let MapView, Marker;
@@ -43,8 +41,6 @@ const MapScreen = () => {
 
   // Refs
   const mapRef = useRef(null);
-  const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ['15%', '50%', '90%'], []);
 
   useEffect(() => {
     const sampleAlerts = require('../../report.json');
@@ -156,8 +152,8 @@ const MapScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Sheet for Alerts */}
-      <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
+      {/* Custom Bottom Sheet for Alerts */}
+      <CustomBottomSheet>
         <View style={styles.sheetContent}>
           <Text style={styles.sheetTitle}>📢 Active Alerts</Text>
           {alerts.length > 0 ? (
@@ -171,7 +167,7 @@ const MapScreen = () => {
             <Text style={styles.noDataText}>No alerts available</Text>
           )}
         </View>
-      </BottomSheet>
+      </CustomBottomSheet>
     </View>
   );
 };
