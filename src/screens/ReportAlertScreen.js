@@ -1,393 +1,350 @@
-// ReportAlertScreen.js - Form to report new alerts/incidents
 import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
   TouchableOpacity,
+  ScrollView,
+  Image,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
+import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
 
-const ReportAlertScreen = ({ navigation }) => {
-  const [reportData, setReportData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    category: '',
-    severity: '',
-  });
-  const [loading, setLoading] = useState(false);
+const ReportAlertScreen = () => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [hazardType, setHazardType] = useState('Fire');
+  const [hazardDescription, setHazardDescription] = useState('');
+  const [severity, setSeverity] = useState('Medium');
+  const [location, setLocation] = useState(null);
+  const [landmark, setLandmark] = useState('');
+  const [photo, setPhoto] = useState(null);
 
-  // Alert categories
-  const categories = [
-    'Traffic Accident',
-    'Weather Emergency',
-    'Security Incident',
-    'Medical Emergency',
-    'Fire Emergency',
-    'Infrastructure Issue',
-    'Other',
-  ];
+  // 📍 Get Current Location + Reverse Geocoding
+  const handleGetLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Location permission is required.');
+      return;
+    }
 
-  // Severity levels
-  const severityLevels = [
-    { label: 'Low', value: 'low', color: '#4CAF50' },
-    { label: 'Medium', value: 'medium', color: '#FFA500' },
-    { label: 'High', value: 'high', color: '#FF6B6B' },
-    { label: 'Critical', value: 'critical', color: '#D32F2F' },
-  ];
+    let loc = await Location.getCurrentPositionAsync({});
+    setLocation({
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+    });
 
-  // Update form field values
-  const updateField = (field, value) => {
-    setReportData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // reverse geocoding for landmark
+    let geocode = await Location.reverseGeocodeAsync(loc.coords);
+    if (geocode.length > 0) {
+      let place = geocode[0];
+      setLandmark(`${place.name || ''}, ${place.street || ''}, ${place.city || ''}`);
+    }
   };
 
-  // Validate form data
-  const validateForm = () => {
-    const { title, description, location, category, severity } = reportData;
-
-    if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a title for your report');
-      return false;
+  // 📸 Take Photo from Camera
+  const handleTakePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Camera permission is required.');
+      return;
     }
 
-    if (!description.trim()) {
-      Alert.alert('Error', 'Please provide a description of the incident');
-      return false;
-    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-    if (!location.trim()) {
-      Alert.alert('Error', 'Please specify the location');
-      return false;
+    if (!result.canceled) {
+      setPhoto(result.assets[0]); // save the photo object
     }
-
-    if (!category) {
-      Alert.alert('Error', 'Please select a category');
-      return false;
-    }
-
-    if (!severity) {
-      Alert.alert('Error', 'Please select a severity level');
-      return false;
-    }
-
-    return true;
   };
 
-  // Handle form submission
-  const handleSubmitReport = () => {
-    if (!validateForm()) return;
+  // 🚨 Submit
+  const handleSubmit = () => {
+    if (!title || !description || !hazardDescription || !location || !photo) {
+      Alert.alert('Missing Data', 'Please fill in all fields and attach a photo.');
+      return;
+    }
 
-    setLoading(true);
-    // TODO: Implement API call to submit report
-    console.log('Submitting report:', reportData);
+    console.log({
+      title,
+      description,
+      nearestLandmark: landmark,
+      hazardType,
+      hazardDescription,
+      severity,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      photo,
+    });
 
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert(
-        'Success',
-        'Your report has been submitted successfully. Thank you for helping keep the community safe!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Reset form and navigate back
-              setReportData({
-                title: '',
-                description: '',
-                location: '',
-                category: '',
-                severity: '',
-              });
-              navigation.goBack();
-            },
-          },
-        ]
-      );
-    }, 1500);
+    Alert.alert('✅ Success', 'Alert Submitted Successfully!');
   };
-
-  // Render category selection buttons
-  const renderCategoryButton = (category) => (
-    <TouchableOpacity
-      key={category}
-      style={[
-        styles.categoryButton,
-        reportData.category === category && styles.categoryButtonSelected
-      ]}
-      onPress={() => updateField('category', category)}
-    >
-      <Text style={[
-        styles.categoryButtonText,
-        reportData.category === category && styles.categoryButtonTextSelected
-      ]}>
-        {category}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  // Render severity selection buttons
-  const renderSeverityButton = (severity) => (
-    <TouchableOpacity
-      key={severity.value}
-      style={[
-        styles.severityButton,
-        reportData.severity === severity.value && { backgroundColor: severity.color }
-      ]}
-      onPress={() => updateField('severity', severity.value)}
-    >
-      <Text style={[
-        styles.severityButtonText,
-        reportData.severity === severity.value && styles.severityButtonTextSelected
-      ]}>
-        {severity.label}
-      </Text>
-    </TouchableOpacity>
-  );
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>Report Alert</Text>
-        <Text style={styles.subtitle}>Help keep your community safe</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>🚨 Report Emergency Alert</Text>
+
+      {/* Title Input */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Alert Title</Text>
+        <TextInput
+          style={styles.input}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Enter a title for the alert"
+        />
       </View>
 
-      <ScrollView style={styles.content}>
-        <View style={styles.form}>
-          {/* Title Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Title *</Text>
-            <TextInput
-              style={styles.input}
-              value={reportData.title}
-              onChangeText={(value) => updateField('title', value)}
-              placeholder="Brief title of the incident"
-              maxLength={100}
-            />
-          </View>
+      {/* Description Input */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>General Description</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Describe the emergency situation"
+          multiline
+        />
+      </View>
 
-          {/* Description Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Description *</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={reportData.description}
-              onChangeText={(value) => updateField('description', value)}
-              placeholder="Detailed description of what happened"
-              multiline
-              numberOfLines={4}
-              maxLength={500}
-            />
-          </View>
-
-          {/* Location Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Location *</Text>
-            <TextInput
-              style={styles.input}
-              value={reportData.location}
-              onChangeText={(value) => updateField('location', value)}
-              placeholder="Street address or landmark"
-            />
-            <TouchableOpacity style={styles.locationButton}>
-              <Text style={styles.locationButtonText}>📍 Use Current Location</Text>
+      {/* Hazard Type */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Type of Hazard</Text>
+        <View style={styles.rowWrap}>
+          {['Fire', 'Flood', 'Accident', 'Earthquake', 'Other'].map((type) => (
+            <TouchableOpacity
+              key={type}
+              style={[
+                styles.optionButton,
+                hazardType === type && styles.selectedOption,
+              ]}
+              onPress={() => setHazardType(type)}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  hazardType === type && styles.selectedOptionText,
+                ]}
+              >
+                {type}
+              </Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Category Selection */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Category *</Text>
-            <View style={styles.categoryContainer}>
-              {categories.map(renderCategoryButton)}
-            </View>
-          </View>
-
-          {/* Severity Selection */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Severity Level *</Text>
-            <View style={styles.severityContainer}>
-              {severityLevels.map(renderSeverityButton)}
-            </View>
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmitReport}
-            disabled={loading}
-          >
-            <Text style={styles.submitButtonText}>
-              {loading ? 'Submitting Report...' : 'Submit Report'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Emergency Notice */}
-          <View style={styles.emergencyNotice}>
-            <Text style={styles.emergencyTitle}>⚠️ Emergency?</Text>
-            <Text style={styles.emergencyText}>
-              For immediate life-threatening emergencies, call 911 directly instead of using this form.
-            </Text>
-          </View>
+          ))}
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+
+      {/* Hazard Description */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Description of Hazard</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={hazardDescription}
+          onChangeText={setHazardDescription}
+          placeholder="Provide details about the hazard"
+          multiline
+        />
+      </View>
+
+      {/* Severity */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Severity Level</Text>
+        <View style={styles.rowWrap}>
+          {['Low', 'Medium', 'High', 'Critical'].map((level) => (
+            <TouchableOpacity
+              key={level}
+              style={[
+                styles.optionButton,
+                severity === level && styles.selectedOption,
+              ]}
+              onPress={() => setSeverity(level)}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  severity === level && styles.selectedOptionText,
+                ]}
+              >
+                {level}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Location */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Location</Text>
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={handleGetLocation}
+        >
+          <Text style={styles.locationButtonText}>
+            {location ? '📍 Update Location' : '📍 Get Current Location'}
+          </Text>
+        </TouchableOpacity>
+        {location && (
+          <View style={{ marginTop: 10 }}>
+            <Text style={styles.locationText}>
+              Lat: {location.latitude.toFixed(6)}, Long: {location.longitude.toFixed(6)}
+            </Text>
+            {landmark ? (
+              <Text style={styles.locationText}>Nearest Landmark: {landmark}</Text>
+            ) : null}
+          </View>
+        )}
+      </View>
+
+      {/* Photo */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Photo Evidence</Text>
+        <TouchableOpacity
+          style={styles.photoButton}
+          onPress={handleTakePhoto}
+        >
+          <Text style={styles.photoButtonText}>
+            {photo ? '📷 Change Image' : '📷 Upload Image'}
+          </Text>
+        </TouchableOpacity>
+
+        {photo && (
+          <View style={styles.photoPreviewContainer}>
+            <Image
+              source={{ uri: photo.uri }}
+              style={styles.photoPreview}
+            />
+          </View>
+        )}
+      </View>
+
+      {/* Submit */}
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit}
+      >
+        <Text style={styles.submitButtonText}>🚀 Submit Alert</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#FF6B6B',
-    padding: 20,
-    paddingTop: 50,
-    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fafafa',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
+    marginBottom: 20,
+    color: '#d32f2f',
+    textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 16,
-    color: 'white',
-    opacity: 0.9,
-  },
-  content: {
-    flex: 1,
-  },
-  form: {
-    padding: 20,
-  },
-  inputContainer: {
-    marginBottom: 25,
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
+    color: '#444',
   },
   input: {
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    backgroundColor: 'white',
   },
   textArea: {
-    height: 100,
+    minHeight: 90,
     textAlignVertical: 'top',
   },
-  locationButton: {
-    backgroundColor: '#007AFF',
-    padding: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  locationButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  categoryContainer: {
+  rowWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
   },
-  categoryButton: {
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
+  optionButton: {
     paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 10,
-  },
-  categoryButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  categoryButtonText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  categoryButtonTextSelected: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  severityContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  severityButton: {
-    backgroundColor: 'white',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
-    flex: 0.22,
-    alignItems: 'center',
+    margin: 4,
+    backgroundColor: '#fff',
   },
-  severityButtonText: {
+  selectedOption: {
+    backgroundColor: '#d32f2f',
+    borderColor: '#d32f2f',
+  },
+  optionText: {
     fontSize: 14,
     color: '#333',
     fontWeight: '500',
   },
-  severityButtonTextSelected: {
-    color: 'white',
+  selectedOptionText: {
+    color: '#fff',
+  },
+  locationButton: {
+    backgroundColor: '#2196f3',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  locationButtonText: {
+    color: '#fff',
     fontWeight: '600',
+    fontSize: 16,
+  },
+  locationText: {
+    marginTop: 4,
+    fontSize: 14,
+    color: '#555',
+  },
+  photoButton: {
+    backgroundColor: '#4caf50',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  photoButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  photoPreviewContainer: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  photoPreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    resizeMode: 'cover',
   },
   submitButton: {
-    backgroundColor: '#FF6B6B',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: '#d32f2f',
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
-  },
-  submitButtonDisabled: {
-    backgroundColor: '#ccc',
+    marginBottom: 40,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+    elevation: 5,
   },
   submitButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  emergencyNotice: {
-    backgroundColor: '#FFF3CD',
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#FFEAA7',
-    marginTop: 20,
-  },
-  emergencyTitle: {
-    fontSize: 16,
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#856404',
-    marginBottom: 5,
-  },
-  emergencyText: {
-    fontSize: 14,
-    color: '#856404',
-    lineHeight: 20,
+    fontSize: 18,
   },
 });
 

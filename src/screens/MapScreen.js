@@ -1,17 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Platform,
+  FlatList,
+  Pressable,
+} from 'react-native';
 import * as Location from 'expo-location';
 import mapService from '../services/mapService';
-import { groupAlertsByGrid, getMarkerColor, getMarkerSize } from '../utils/mapUtils';
+import {
+  getMarkerColor,
+} from '../utils/mapUtils';
 import MapScreenWeb from './MapScreenWeb';
 
-// Only import MapView if not on web platform
-let MapView, Marker, Polygon;
+// Bottom Sheet
+import BottomSheet from '@gorhom/bottom-sheet';
+
+// Only import MapView if not on web
+let MapView, Marker;
 if (Platform.OS !== 'web') {
   const Maps = require('react-native-maps');
   MapView = Maps.default;
   Marker = Maps.Marker;
-  Polygon = Maps.Polygon;
 }
 
 const MapScreen = () => {
@@ -28,10 +40,13 @@ const MapScreen = () => {
   });
   const [currentZoom, setCurrentZoom] = useState(5);
   const [alerts, setAlerts] = useState([]);
-  const [gridKeys, setGridKeys] = useState([]);
+
+  // Refs
+  const mapRef = useRef(null);
+  const bottomSheetRef = useRef(null);
+  const snapPoints = useMemo(() => ['15%', '50%', '90%'], []);
 
   useEffect(() => {
-    // In a real app, you would fetch this data from an API
     const sampleAlerts = require('../../report.json');
     mapService.setAlerts(sampleAlerts);
     updateAlerts(currentZoom);
@@ -40,37 +55,16 @@ const MapScreen = () => {
   const updateAlerts = (zoom) => {
     const groupedAlerts = mapService.getGroupedAlerts(zoom);
     setAlerts(groupedAlerts);
-
-    if (zoom >= 10) {
-      const groups = groupAlertsByGrid(mapService.getAllAlerts());
-      setGridKeys(Object.keys(groups));
-    } else {
-      setGridKeys([]);
-    }
   };
 
   const onRegionChange = (newRegion) => {
-    // Calculate zoom level based on latitude delta
     const zoom = Math.round(Math.log(360 / newRegion.latitudeDelta) / Math.LN2);
-    
+
     if (zoom !== currentZoom) {
       setCurrentZoom(zoom);
       updateAlerts(zoom);
     }
-    
     setRegion(newRegion);
-  };
-
-  const handleMarkerPress = (alert) => {
-    if (alert.isCluster && currentZoom < 10) {
-      // Zoom into the cluster
-      setRegion({
-        latitude: alert.LOCATION.latitude,
-        longitude: alert.LOCATION.longitude,
-        latitudeDelta: region.latitudeDelta / 2,
-        longitudeDelta: region.longitudeDelta / 2,
-      });
-    }
   };
 
   useEffect(() => {
@@ -83,10 +77,44 @@ const MapScreen = () => {
     })();
   }, []);
 
+  const handleAlertPress = (alert) => {
+    if (!mapRef.current) return;
+
+    // Animate map to alert location
+    mapRef.current.animateToRegion(
+      {
+        latitude: alert.LOCATION.latitude,
+        longitude: alert.LOCATION.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      1000 // duration
+    );
+  };
+
+  const renderAlertItem = ({ item }) => (
+    <Pressable onPress={() => handleAlertPress(item)} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
+      <View style={styles.alertCard}>
+        <Text style={styles.alertTitle}>{item.NAME}</Text>
+        <Text style={styles.alertDesc}>{item.Description}</Text>
+        <View style={styles.alertFooter}>
+          <Text style={styles.severity}>
+            Severity: {item.severityIndex || 'N/A'}
+          </Text>
+          {item.isCluster && (
+            <Text style={styles.clusterTag}>+{item.count} reports</Text>
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+
   return (
     <View style={styles.container}>
+      {/* Map */}
       <MapView
-        style={styles.map}
+        ref={mapRef}
+        style={StyleSheet.absoluteFillObject}
         region={region}
         onRegionChangeComplete={onRegionChange}
       >
@@ -107,21 +135,43 @@ const MapScreen = () => {
         })}
       </MapView>
 
+      {/* Reset Button */}
       <View style={styles.controls}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.controlButton}
           onPress={() => {
-            setRegion({
-              latitude: 20.5937,
-              longitude: 78.9629,
-              latitudeDelta: 20,
-              longitudeDelta: 20,
-            });
+            if (!mapRef.current) return;
+            mapRef.current.animateToRegion(
+              {
+                latitude: 20.5937,
+                longitude: 78.9629,
+                latitudeDelta: 20,
+                longitudeDelta: 20,
+              },
+              1000
+            );
           }}
         >
           <Text style={styles.controlButtonText}>🏠 Reset View</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Bottom Sheet for Alerts */}
+      <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
+        <View style={styles.sheetContent}>
+          <Text style={styles.sheetTitle}>📢 Active Alerts</Text>
+          {alerts.length > 0 ? (
+            <FlatList
+              data={alerts}
+              keyExtractor={(item, index) => `${item.NAME}-${index}`}
+              renderItem={renderAlertItem}
+              contentContainerStyle={{ paddingBottom: 50 }}
+            />
+          ) : (
+            <Text style={styles.noDataText}>No alerts available</Text>
+          )}
+        </View>
+      </BottomSheet>
     </View>
   );
 };
@@ -130,45 +180,76 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  map: {
-    flex: 1,
-  },
   controls: {
     position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    padding: 10,
-  },
-  controlButton: {
-    backgroundColor: 'white',
-    paddingHorizontal: 20,
+    top: 40,
+    right: 20,
+    backgroundColor: '#1E90FF',
+    borderRadius: 25,
+    paddingHorizontal: 15,
     paddingVertical: 10,
-    borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
     elevation: 5,
   },
-  controlButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    paddingVertical: 12,
-    borderRadius: 8,
-    flex: 0.45,
+  controlButton: {
     alignItems: 'center',
   },
   controlButtonText: {
     color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sheetContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  noDataText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#999',
+  },
+  alertCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  alertTitle: {
     fontSize: 16,
     fontWeight: '600',
+    marginBottom: 4,
+  },
+  alertDesc: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 8,
+  },
+  alertFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  severity: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#FF4500',
+  },
+  clusterTag: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#1E90FF',
   },
 });
 

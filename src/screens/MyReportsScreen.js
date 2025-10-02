@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-const MyReportsScreen = () => {
+const MyReportsScreen = ({ navigation }) => {
   // Sample reports data (will be replaced with API data)
   const sampleReports = [
     {
@@ -82,7 +82,10 @@ const MyReportsScreen = () => {
         )}
 
         {/* Add New Report Button */}
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => navigation.navigate('ReportAlert')}
+        >
           <Text style={styles.addButtonText}>+ Report New Alert</Text>
         </TouchableOpacity>
       </ScrollView>

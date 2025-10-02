@@ -18,6 +18,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow AlertReporterApp to use your location."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow AlertReporterApp to access your camera for reporting alerts."
+        }
       ]
     ],
     "ios": {
@@ -41,7 +47,8 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA"
       ],
       "edgeToEdgeEnabled": true
     },

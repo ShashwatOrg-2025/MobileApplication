@@ -21,6 +21,31 @@ import { isAuthenticated } from '../services/authService';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Stack Navigator for ReportAlert
+const ReportStack = createNativeStackNavigator();
+
+const ReportStackNavigator = () => {
+  return (
+    <ReportStack.Navigator>
+      <ReportStack.Screen 
+        name="MyReportsList" 
+        component={MyReportsScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <ReportStack.Screen
+        name="ReportAlert"
+        component={ReportAlertScreen}
+        options={{
+          title: 'Report New Alert',
+          headerShown: true,
+        }}
+      />
+    </ReportStack.Navigator>
+  );
+};
+
 // Bottom Tab Navigator for authenticated users
 const MainTabNavigator = () => {
   return (
@@ -54,7 +79,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="MyReports"
-        component={MyReportsScreen}
+        component={ReportStackNavigator}
         options={{
           title: 'My Reports',
           tabBarIcon: ({ color }) => (
